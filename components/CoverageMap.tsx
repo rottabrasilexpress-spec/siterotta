@@ -11,7 +11,16 @@ const regionStates: Record<string, string[]> = {
   norte:    ['AM', 'PA', 'TO', 'RR', 'RO', 'AC', 'AP'],
 };
 
-// Cores base de cada região
+// Cores de destaque para cada região quando ativa
+const highlightColors: Record<string, string> = {
+  sudeste:  '#f9821d', // Laranja
+  sul:      '#22c55e', // Verde
+  centro:   '#3b82f6', // Azul
+  nordeste: '#ec4899', // Rosa
+  norte:    '#ef4444', // Vermelho
+};
+
+// Cores base de cada região (quando não ativa)
 const regionColors: Record<string, string> = {
   sudeste:  '#1d4ed8',
   sul:      '#047857',
@@ -27,7 +36,8 @@ const regions = [
     states: 'SP, RJ, MG, ES',
     time: '1 a 2 dias',
     image: 'https://images.unsplash.com/photo-1483729558449-99ef09a8c325?auto=format&fit=crop&q=80&w=200&h=200',
-    highlight: true
+    highlight: true,
+    color: highlightColors.sudeste
   },
   {
     id: 'sul',
@@ -35,7 +45,8 @@ const regions = [
     states: 'PR, SC, RS',
     time: '1 a 3 dias',
     image: 'https://a.imagem.app/BUvYFm.png',
-    highlight: false
+    highlight: false,
+    color: highlightColors.sul
   },
   {
     id: 'centro',
@@ -43,7 +54,8 @@ const regions = [
     states: 'DF, GO, MT, MS',
     time: '2 a 4 dias',
     image: 'https://a.imagem.app/BUvFl0.png',
-    highlight: false
+    highlight: false,
+    color: highlightColors.centro
   },
   {
     id: 'nordeste',
@@ -51,7 +63,8 @@ const regions = [
     states: 'BA, PE, CE, outros',
     time: '3 a 6 dias',
     image: 'https://a.imagem.app/BUv0pb.png',
-    highlight: false
+    highlight: false,
+    color: highlightColors.nordeste
   },
   {
     id: 'norte',
@@ -59,7 +72,8 @@ const regions = [
     states: 'AM, PA, TO, outros',
     time: '4 a 10 dias',
     image: 'https://a.imagem.app/BUvnQX.png',
-    highlight: false
+    highlight: false,
+    color: highlightColors.norte
   }
 ];
 
@@ -103,7 +117,7 @@ const CoverageMap: React.FC = () => {
     const baseColor = regionColors[regionId] ?? "#1a1a1a";
 
     if (!activeRegion) return baseColor;
-    if (activeRegion === regionId) return "#f9821d"; // highlighted orange
+    if (activeRegion === regionId) return highlightColors[regionId] || "#f9821d"; 
     return "#1a1a1a"; // dim other regions
   };
 
@@ -331,29 +345,45 @@ const CoverageMap: React.FC = () => {
                     className={`group relative flex items-center p-1 transition-all duration-500 hover:scale-[1.02] cursor-pointer select-none ${region.highlight ? 'ml-0' : 'lg:ml-8'}`}
                   >
                     {/* Connector (Desktop) */}
-                    <div className={`absolute left-[-2rem] top-1/2 w-8 h-px transition-all duration-300 group-hover:w-12 lg:block hidden ${isActive ? 'bg-brand-gold w-12' : 'bg-brand-gold/30'}`}></div>
-                    <div className={`absolute left-[-2.2rem] top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full border lg:block hidden transition-colors ${isActive ? 'bg-brand-gold border-brand-gold' : 'bg-brand-dark border-brand-gold/50 group-hover:bg-brand-gold'}`}></div>
+                    <div 
+                      className="absolute left-[-2rem] top-1/2 w-8 h-px transition-all duration-300 group-hover:w-12 lg:block hidden" 
+                      style={{ 
+                        backgroundColor: isActive ? region.color : 'rgba(245, 130, 32, 0.3)',
+                        width: isActive ? '3rem' : '2rem' 
+                      }}
+                    ></div>
+                    <div 
+                      className="absolute left-[-2.2rem] top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full border lg:block hidden transition-colors"
+                      style={{ 
+                        backgroundColor: isActive ? region.color : 'transparent',
+                        borderColor: region.color || 'rgba(245, 130, 32, 0.5)'
+                      }}
+                    ></div>
 
                     {/* Card */}
                     <motion.div
                       animate={isActive
-                        ? { scale: 1.03, boxShadow: '0 0 30px rgba(245,130,32,0.25)' }
+                        ? { scale: 1.03, boxShadow: `0 0 30px ${region.color}40` }
                         : { scale: 1, boxShadow: '0 0 0px rgba(0,0,0,0)' }
                       }
                       transition={{ duration: 0.3 }}
                       className={`
                         w-full flex items-center justify-between p-3 sm:p-5 rounded-2xl border backdrop-blur-md transition-all duration-300
                         ${isActive
-                          ? 'bg-gradient-to-r from-brand-gold/20 to-transparent border-brand-gold shadow-[0_0_30px_rgba(245,130,32,0.2)]'
+                          ? 'bg-white/10'
                           : region.highlight
                             ? 'bg-gradient-to-r from-brand-gold/10 to-transparent border-brand-gold/50'
                             : 'bg-white/5 border-white/10 hover:bg-white/10 hover:border-brand-gold/30'
                         }
                       `}
+                      style={isActive ? { borderColor: region.color, borderLeftWidth: '4px' } : {}}
                     >
                       <div className="flex items-center gap-3 sm:gap-5">
                         {/* Region Image */}
-                        <div className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg relative flex-shrink-0 transition-transform duration-300 group-hover:scale-105 ${isActive ? 'ring-2 ring-brand-gold' : region.highlight ? 'ring-2 ring-brand-gold/50' : 'ring-1 ring-white/10'}`}>
+                        <div 
+                          className={`w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl overflow-hidden shadow-lg relative flex-shrink-0 transition-transform duration-300 group-hover:scale-105 ${isActive ? '' : region.highlight ? 'ring-2 ring-brand-gold/50' : 'ring-1 ring-white/10'}`}
+                          style={isActive ? { boxShadow: `0 0 0 2px ${region.color}` } : {}}
+                        >
                           <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent z-10"></div>
                           <img
                             src={region.image}
@@ -365,14 +395,22 @@ const CoverageMap: React.FC = () => {
                         </div>
 
                         <div>
-                          <h4 className={`font-bold text-sm sm:text-lg transition-colors ${isActive ? 'text-brand-gold' : region.highlight ? 'text-white' : 'text-gray-200'}`}>{region.name}</h4>
+                          <h4 
+                            className="font-bold text-sm sm:text-lg transition-colors"
+                            style={{ color: isActive ? region.color : region.highlight ? 'white' : 'rgb(229, 231, 235)' }}
+                          >
+                            {region.name}
+                          </h4>
                           <p className="text-[8px] sm:text-[10px] text-gray-500 uppercase tracking-wide">{region.states}</p>
                         </div>
                       </div>
 
                       <div className="text-right">
                         <span className="block text-[8px] sm:text-[9px] text-gray-500 font-bold uppercase mb-1 tracking-widest">Prazo</span>
-                        <span className={`text-sm sm:text-xl font-bold tracking-tight transition-colors ${isActive ? 'text-brand-gold' : region.highlight ? 'text-brand-gold' : 'text-white group-hover:text-brand-gold'}`}>
+                        <span 
+                          className="text-sm sm:text-xl font-bold tracking-tight transition-colors"
+                          style={{ color: isActive ? region.color : region.highlight ? 'var(--brand-gold)' : 'white' }}
+                        >
                           {region.time}
                         </span>
                       </div>

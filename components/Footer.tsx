@@ -176,7 +176,7 @@ const Footer: React.FC = () => {
             </div>
           </div>
           
-          <div className="flex items-center gap-6 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-500">
+          <div className="flex items-center gap-6 opacity-100 transition-all duration-500">
              <div className="flex items-center gap-2 border-r border-white/10 pr-6">
                 <span className="material-symbols-outlined text-green-500 text-lg">lock</span>
                 <div className="flex flex-col">
