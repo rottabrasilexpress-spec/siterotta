@@ -1,0 +1,1172 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>iPhone 15 Pro - Tutorial Rotta Express</title>
+    <style>
+        :root {
+            --ios-bg: #f2f2f7;
+            --ios-blue: #007aff;
+            --ios-text: #000000;
+            --ios-gray: #8e8e93;
+            --ios-border: rgba(60, 60, 67, 0.2);
+            --titanium: #2c2c2e;
+            
+            /* Paleta Rotta Brasil Express */
+            --rotta-orange: #f28522;
+            --rotta-green: #28a745;
+            --rotta-blue: #007bff;
+            --rotta-glass: rgba(30, 30, 35, 0.65);
+            --rotta-border: rgba(255, 255, 255, 0.15);
+            --rotta-red: #d92d20;
+            --wpp-green: #25D366;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            /* Fundo agora totalmente transparente para integração */
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow: hidden;
+        }
+
+        .instruction {
+            position: absolute;
+            top: 40px;
+            color: rgba(0, 0, 0, 0.5);
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            pointer-events: none;
+            z-index: 100;
+            text-align: center;
+            text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+        }
+
+        #scene {
+            position: relative;
+            transform: scale(0.75);
+        }
+
+        /* --- NOVO HARDWARE: CHASSI VETORIAL --- */
+        .phone-wrapper {
+            width: 380px;
+            height: 820px;
+            position: relative;
+            /* Sombras aplicadas ao wrapper para flutuação realista */
+            filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.1))
+                    drop-shadow(0 30px 60px rgba(0, 0, 0, 0.25))
+                    drop-shadow(0 60px 100px rgba(0, 0, 0, 0.15));
+        }
+
+        .chassis-svg {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            pointer-events: none; /* Permite cliques na tela */
+            z-index: 10;
+        }
+
+        /* Textura de Titânio Escovado (Ruído Metálico) */
+        .phone-body::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url('data:image/svg+xml;utf8,<svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg"><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(%23noise)" opacity="0.25"/></svg>');
+            clip-path: url(#squircle-outer);
+            pointer-events: none;
+            mix-blend-mode: overlay;
+            z-index: 1; /* Acima do gradiente de titânio, abaixo do Bezel */
+        }
+        
+        /* Bezel deve ficar acima da textura */
+        .bezel {
+            position: absolute;
+            inset: 4px;
+            background: #111;
+            clip-path: url(#squircle-outer);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2;
+        }
+
+        /* Botões laterais com chanfros, brilhos e textura de metal encaixado */
+        .button-mute, .button-vol-up, .button-vol-down, .button-power {
+            position: absolute;
+            z-index: 5;
+            background: linear-gradient(to bottom, #5a5a5c 0%, #8a8a8c 10%, #3a3a3c 50%, #8a8a8c 90%, #5a5a5c 100%);
+        }
+
+        .button-mute { left: -5px; top: 125px; width: 5px; height: 32px; border-radius: 4px 0 0 4px; border-left: 1px solid rgba(255,255,255,0.3); border-top: 1px solid rgba(255,255,255,0.15); border-bottom: 1px solid rgba(0,0,0,0.5); box-shadow: inset -1px 0 1px rgba(0,0,0,0.7), -1px 2px 4px rgba(0,0,0,0.3); }
+        .button-vol-up { left: -5px; top: 185px; width: 5px; height: 62px; border-radius: 4px 0 0 4px; border-left: 1px solid rgba(255,255,255,0.3); border-top: 1px solid rgba(255,255,255,0.15); border-bottom: 1px solid rgba(0,0,0,0.5); box-shadow: inset -1px 0 1px rgba(0,0,0,0.7), -1px 2px 4px rgba(0,0,0,0.3); }
+        .button-vol-down { left: -5px; top: 260px; width: 5px; height: 62px; border-radius: 4px 0 0 4px; border-left: 1px solid rgba(255,255,255,0.3); border-top: 1px solid rgba(255,255,255,0.15); border-bottom: 1px solid rgba(0,0,0,0.5); box-shadow: inset -1px 0 1px rgba(0,0,0,0.7), -1px 2px 4px rgba(0,0,0,0.3); }
+        .button-power { right: -5px; top: 215px; width: 5px; height: 95px; border-radius: 0 4px 4px 0; border-right: 1px solid rgba(255,255,255,0.3); border-top: 1px solid rgba(255,255,255,0.15); border-bottom: 1px solid rgba(0,0,0,0.5); box-shadow: inset 1px 0 1px rgba(0,0,0,0.7), 1px 2px 4px rgba(0,0,0,0.3); }
+
+        /* Linhas de Antena Plásticas (Realismo Premium) */
+        .antenna-band {
+            position: absolute;
+            background: #1c1c1e;
+            z-index: 4;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.8);
+        }
+        .antenna-tl { left: -1px; top: 75px; width: 2px; height: 6px; }
+        .antenna-tr { right: -1px; top: 75px; width: 2px; height: 6px; }
+        .antenna-bl { left: -1px; bottom: 75px; width: 2px; height: 6px; }
+        .antenna-br { right: -1px; bottom: 75px; width: 2px; height: 6px; }
+
+        /* Tela exatamente recortada acompanhando o Bezel */
+        .screen {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #000;
+            /* Recorte exato 14px para dentro usando as mesmas curvas matemáticas */
+            clip-path: url(#screen-clip);
+            z-index: 20;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* --- STATUS BAR E DYNAMIC ISLAND --- */
+        .status-bar {
+            height: 50px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 35px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #fff;
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            z-index: 60;
+            transition: color 0.3s;
+        }
+        .status-bar.dark-mode { color: #000; }
+        .status-bar.dark-mode .status-icons svg path, .status-bar.dark-mode .status-icons svg rect { fill: #000; }
+        .status-bar.dark-mode .status-icons svg .stroke-icon { stroke: #000; }
+        .status-bar.dark-mode .battery { border-color: #000; }
+        .status-bar.dark-mode .battery::after, .status-bar.dark-mode .battery-fill { background: #000; }
+        .status-bar.dark-mode .battery-percentage { color: #000; }
+        
+        .status-icons { display: flex; align-items: center; gap: 6px; }
+        .status-icons svg path, .status-icons svg rect { fill: #fff; transition: fill 0.3s; }
+        .status-icons svg .stroke-icon { stroke: #fff; transition: stroke 0.3s; }
+        
+        .battery-percentage { font-size: 13px; font-weight: bold; margin-right: 3px; letter-spacing: 0.5px; }
+        .battery { width: 22px; height: 11px; border: 1px solid #fff; border-radius: 3px; position: relative; padding: 1px; transition: border-color 0.3s; }
+        .battery::after { content: ''; position: absolute; right: -4px; top: 3px; width: 2px; height: 5px; background: #fff; border-radius: 0 2px 2px 0; transition: background 0.3s; }
+        .battery-fill { width: 67%; height: 100%; background: #34c759 !important; border-radius: 1px; transition: background 0.3s; }
+
+        /* REALISMO NOS SENSORES (Dynamic Island) */
+        .dynamic-island {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 125px;
+            height: 35px;
+            background: #000;
+            border-radius: 20px;
+            z-index: 65;
+            box-shadow: 0 0 4px rgba(0,0,0,0.5), inset 0 0 1px rgba(255,255,255,0.08); /* Brilho sutil na borda da pílula */
+            overflow: hidden;
+        }
+        
+        .island-sensors {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            /* 95% oculto por padrão. Revelado via JS quando a luz passa */
+            opacity: var(--sensor-opacity, 0.03); 
+            transition: opacity 0.1s ease-out;
+            pointer-events: none;
+        }
+
+        /* FaceID / Projetor IR (Pílula avermelhada/roxa no lado esquerdo) */
+        .sensor-faceid {
+            width: 18px;
+            height: 12px;
+            border-radius: 10px;
+            background: radial-gradient(ellipse at 40% 40%, rgba(35, 10, 40, 1) 0%, rgba(5, 0, 10, 1) 70%);
+            box-shadow: inset 0 1px 2px rgba(255,255,255,0.15);
+        }
+
+        /* Câmera Frontal (Círculo azul profundo no lado direito) */
+        .sensor-camera {
+            width: 13px;
+            height: 13px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, rgba(20, 40, 100, 1) 0%, rgba(5, 10, 20, 1) 60%);
+            box-shadow: inset 0 1px 3px rgba(255,255,255,0.3);
+        }
+
+        /* --- HOME INDICATOR --- */
+        .home-indicator-container {
+            position: absolute; bottom: 0; left: 0; right: 0; height: 30px; display: flex; justify-content: center; align-items: center; z-index: 85; cursor: pointer;
+        }
+        .home-indicator { width: 130px; height: 5px; background: #fff; border-radius: 10px; transition: background 0.3s, transform 0.2s; }
+        .home-indicator-container:hover .home-indicator { transform: scaleY(1.5); }
+        .dark-mode-indicator .home-indicator { background: #000; }
+
+        /* --- TELA INICIAL --- */
+        .home-screen {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: url('https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=100&w=1600&auto=format&fit=crop') center/cover;
+            display: flex; flex-direction: column; padding-top: 80px; z-index: 10;
+            transition: transform 0.6s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.5s;
+        }
+        .home-screen.hidden { transform: scale(1.1); opacity: 0; pointer-events: none; }
+
+        .app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px 15px; padding: 0 25px; }
+        .app-icon-wrapper { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); position: relative; }
+        .app-icon-wrapper:active { transform: scale(0.85); }
+
+        .app-icon {
+            width: 65px; height: 65px; border-radius: 16px; background: #fff; display: flex; align-items: center; justify-content: center; font-size: 36px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); margin-bottom: 5px;
+        }
+        .app-name { color: #fff; font-size: 11px; font-weight: 500; text-shadow: 0 1px 2px rgba(0,0,0,0.8); text-align: center; }
+
+        .icon-safari { background: white; position: relative; overflow: hidden; }
+        .icon-safari::before { content: ''; position: absolute; width: 55px; height: 55px; border-radius: 50%; background: conic-gradient(from 45deg, #34c759, #5ac8fa, #007aff, #5856d6, #ff2d55, #ff9500, #ffcc00, #34c759); }
+        .icon-safari::after { content: '🧭'; position: absolute; font-size: 50px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2)); }
+
+        .dock {
+            margin-top: auto; margin-bottom: 25px; margin-left: 20px; margin-right: 20px; height: 90px;
+            background: rgba(255, 255, 255, 0.3); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border-radius: 30px; display: flex; align-items: center; justify-content: space-evenly; padding: 0 10px;
+        }
+
+        .app-window {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--ios-bg); z-index: 20; display: flex; flex-direction: column;
+            transform: scale(0.8); opacity: 0; pointer-events: none;
+            transition: transform 0.6s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.4s;
+        }
+        .app-window.active { transform: scale(1); opacity: 1; pointer-events: all; }
+
+        .ios-nav-bar {
+            height: 50px; padding-top: 50px; background: rgba(40,40,45,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            display: flex; align-items: center; padding-left: 10px; border-bottom: 0.5px solid var(--ios-border); z-index: 40; position: relative;
+        }
+        .ios-back-btn { background: none; border: none; color: var(--ios-blue); font-size: 17px; font-family: inherit; font-weight: 400; cursor: pointer; display: flex; align-items: center; gap: 4px; padding: 8px; }
+        .ios-back-btn::before { content: '‹'; font-size: 26px; font-weight: 300; line-height: 1; margin-top: -2px; }
+
+        .safari-url-bar {
+            background: #333; border-radius: 12px; margin: 0 15px; padding: 10px 15px; font-size: 15px; color: #fff; text-align: center; flex: 1; box-shadow: 0 2px 5px rgba(0,0,0,0.05); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; justify-content: space-between; align-items: center; position: relative;
+        }
+        .safari-url-bar span { font-size: 13px; color: var(--ios-gray); }
+
+        .safari-progress-bar {
+            position: absolute; bottom: 0; left: 0; height: 2.5px; width: 0; background: var(--ios-blue); opacity: 0;
+            transition: width 0.5s ease-in-out, opacity 0.2s; border-radius: 0 0 12px 12px;
+        }
+        .safari-progress-bar.loading { opacity: 1; width: 100%; }
+
+        .rotta-container {
+            flex: 1; background: url('https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?q=100&w=1600&auto=format&fit=crop') center/cover;
+            position: relative; overflow: hidden; color: #fff;
+        }
+        .rotta-container::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.65); pointer-events: none; }
+        
+        .rotta-scroll-wrapper {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; overflow-x: hidden; scroll-behavior: smooth;
+        }
+        .rotta-scroll-wrapper::-webkit-scrollbar { display: none; }
+
+        .rotta-content { position: relative; z-index: 10; padding: 20px 15px 40px; display: flex; flex-direction: column; align-items: center; width: 100%; box-sizing: border-box;}
+
+        .rotta-header { text-align: center; margin-bottom: 20px; width: 100%; }
+        .rotta-logo { font-size: 32px; font-family: "Times New Roman", Times, serif; font-weight: bold; line-height: 1; margin-bottom: 5px; }
+        .rotta-logo .express { font-family: -apple-system, sans-serif; color: var(--rotta-orange); font-style: italic; font-weight: 900; }
+        .rotta-sub { color: var(--rotta-orange); font-size: 10px; font-weight: 700; letter-spacing: 1.5px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px; margin-bottom: 10px; }
+        .rotta-title-desc { font-size: 13px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+
+        .rotta-card {
+            background: var(--rotta-glass); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid var(--rotta-border); border-radius: 16px; padding: 20px; width: 100%; box-sizing: border-box; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            position: relative; min-height: 400px;
+        }
+
+        .step-container {
+            position: absolute; top: 20px; left: 20px; width: calc(100% - 40px);
+            transition: transform 0.55s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.4s;
+            pointer-events: none; opacity: 0;
+        }
+        
+        .step-container.active { transform: translateX(0); opacity: 1; pointer-events: all; position: relative; top: 0; left: 0; width: 100%;}
+        .step-container.exit-left { transform: translateX(-100%); opacity: 0; }
+        .step-container.exit-right { transform: translateX(100%); opacity: 0; }
+        .step-container.enter-right { transform: translateX(100%); opacity: 0; }
+        .step-container.enter-left { transform: translateX(-100%); opacity: 0; }
+
+        .rotta-step-title { display: flex; align-items: center; gap: 8px; font-size: 16px; font-weight: 700; margin-bottom: 25px; }
+        .rotta-step-title svg { fill: var(--rotta-orange); width: 20px; height: 20px; }
+        .rotta-step-subtitle { font-size: 13px; color: #ddd; margin-top: -15px; margin-bottom: 20px; line-height: 1.4; }
+
+        .rotta-group-title { font-size: 10px; font-weight: 800; text-transform: uppercase; display: flex; align-items: center; gap: 6px; margin-bottom: 10px; margin-top: 20px; color: #ddd;}
+        .dot { width: 6px; height: 6px; border-radius: 50%; }
+        .dot.green { background: var(--rotta-green); }
+        .dot.orange { background: var(--rotta-orange); }
+        .dot.blue { background: var(--rotta-blue); }
+
+        .rotta-input-group { position: relative; margin-bottom: 10px; }
+        .rotta-input {
+            width: 100%; background: transparent; border: 1px solid var(--rotta-border); color: #fff; font-size: 13px;
+            padding: 12px 35px 12px 15px; border-radius: 8px; box-sizing: border-box; outline: none; transition: border 0.3s; font-family: inherit;
+            caret-color: var(--ios-blue);
+        }
+        .rotta-input:focus { border-color: var(--rotta-orange); background: rgba(255,255,255,0.05); }
+        .rotta-input::placeholder { color: #aaa; }
+        select.rotta-input { appearance: none; color: #fff; padding-right: 35px; cursor: pointer; }
+        select.rotta-input option { background: #333; color: #fff; }
+        
+        .input-icon { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 14px; opacity: 0.6; pointer-events: none;}
+        .rotta-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        
+        .rotta-toggles { display: flex; gap: 10px; margin-bottom: 5px; }
+        .rotta-toggle-btn {
+            flex: 1; background: transparent; border: 1px solid var(--rotta-border); color: #fff; position: relative;
+            padding: 10px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+        .rotta-toggle-btn.active, .rotta-toggle-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.3); }
+
+        .rotta-submit {
+            background: var(--rotta-orange); color: #fff; border: none; width: 100%; padding: 16px; border-radius: 25px;
+            font-size: 15px; font-weight: 700; margin-top: 25px; cursor: pointer; transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1); position: relative;
+        }
+        .rotta-submit:active { transform: scale(0.96); }
+
+        .rotta-flex-row { display: flex; align-items: center; gap: 12px; margin: 25px 0 15px; font-size: 13px; color: #fff; cursor: pointer; }
+        .ios-toggle-switch { width: 44px; height: 26px; background: rgba(255,255,255,0.2); border-radius: 13px; position: relative; transition: background 0.4s cubic-bezier(0.32, 0.72, 0, 1); flex-shrink: 0; }
+        .ios-toggle-switch.active { background: var(--rotta-green); }
+        .ios-toggle-knob { width: 22px; height: 22px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 2px; transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+        .ios-toggle-switch.active .ios-toggle-knob { transform: translateX(18px); }
+
+        .rotta-availability-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 20px; text-align: center; margin-bottom: 10px; opacity: 0; display: none; transition: opacity 0.4s; }
+        .rotta-availability-box.show { display: block; animation: fadeUpIn 0.4s forwards; }
+        @keyframes fadeUpIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .badge-icon-svg { fill: var(--rotta-orange); width: 28px; height: 28px; margin-bottom: 8px; }
+        .avail-text { font-size: 12px; color: #ccc; margin-bottom: 4px; }
+        .avail-status { font-size: 14px; font-weight: 800; color: var(--rotta-green); letter-spacing: 0.5px; text-transform: uppercase;}
+
+        .rotta-footer-buttons { display: flex; gap: 10px; margin-top: 25px; }
+        .rotta-btn-secondary {
+            flex: 0.5; background: transparent; border: 1px solid rgba(255,255,255,0.3); color: #fff; border-radius: 25px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background 0.3s cubic-bezier(0.32, 0.72, 0, 1); padding: 16px;
+        }
+        .rotta-btn-secondary:active { background: rgba(255,255,255,0.1); }
+        .rotta-footer-buttons .rotta-submit { flex: 1; margin-top: 0; }
+
+        .rotta-subpanel { background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 16px; margin-bottom: 15px; }
+        .subpanel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .subpanel-title { font-size: 14px; font-weight: 700; color: #fff; line-height: 1.2;}
+        .subpanel-subtitle { font-size: 10px; color: #aaa; margin-top: 2px;}
+        .subpanel-subtitle.orange { color: var(--rotta-orange); text-transform: uppercase; font-weight: 700;}
+        
+        .counter-row { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; font-size: 13px; font-weight: 600;}
+        .counter-controls { display: flex; align-items: center; gap: 12px; }
+        .counter-btn { background: var(--rotta-red); color: white; border: none; border-radius: 50%; width: 26px; height: 26px; font-size: 18px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);}
+        .counter-btn:active { transform: scale(0.85); }
+        .counter-val { font-size: 16px; font-weight: 700; width: 16px; text-align: center; }
+
+        .rotta-checkbox-row { display: flex; align-items: center; gap: 12px; cursor: pointer; margin-top: 14px; font-size: 13px; font-weight: 600;}
+        .rotta-checkbox { width: 18px; height: 18px; border: 1.5px solid rgba(255,255,255,0.4); border-radius: 5px; display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1); flex-shrink: 0; }
+        .rotta-checkbox.checked { background: rgba(255,255,255,0.8); border-color: rgba(255,255,255,0.8); }
+        .rotta-checkbox::after { content: '✓'; color: #111; font-weight: bold; font-size: 12px; display: none; margin-top: 1px;}
+        .rotta-checkbox.checked::after { display: block; }
+        
+        .rotta-radio-row { display: flex; align-items: center; gap: 10px; cursor: pointer; margin-top: 12px; font-size: 13px; font-weight: 500;}
+        .rotta-radio { width: 18px; height: 18px; border: 1.5px solid rgba(255,255,255,0.4); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.32, 0.72, 0, 1); flex-shrink: 0;}
+        .rotta-radio.checked { border-color: var(--rotta-orange); }
+        .rotta-radio::after { content: ''; width: 10px; height: 10px; background: var(--rotta-orange); border-radius: 50%; display: none;}
+        .rotta-radio.checked::after { display: block; }
+
+        .dynamic-area { display: none; margin-top: 12px; margin-left: 32px; animation: slideDown 0.4s cubic-bezier(0.32, 0.72, 0, 1) forwards; }
+        .dynamic-area.open { display: block; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+        .dynamic-area .rotta-input { background: rgba(0,0,0,0.2); padding: 10px 12px; font-size: 12px; min-height: 40px;}
+
+        .rotta-warning-box {
+            background: linear-gradient(90deg, rgba(242, 133, 34, 0.1) 0%, rgba(255,255,255,0.02) 100%);
+            border-left: 4px solid var(--rotta-orange); border-radius: 0 12px 12px 0; padding: 15px; margin-bottom: 20px;
+        }
+        .warning-title { font-size: 11px; font-weight: 800; color: var(--rotta-orange); margin-bottom: 5px; }
+        .warning-text { font-size: 12px; line-height: 1.4; color: #ddd; font-weight: 500;}
+
+        .whatsapp-overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: #ffffff;
+            z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            opacity: 0; pointer-events: none; transition: opacity 0.4s ease; color: #333; padding: 25px; text-align: center;
+        }
+        .whatsapp-overlay.active { opacity: 1; pointer-events: all; }
+        .wpp-check { width: 70px; height: 70px; background: var(--wpp-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; color: white; margin-bottom: 30px; box-shadow: 0 5px 15px rgba(37, 211, 102, 0.3);}
+        .wpp-logo { font-size: 28px; font-family: "Times New Roman", Times, serif; font-weight: bold; line-height: 1; margin-bottom: 30px; color: #111; }
+        .wpp-logo .express { font-family: -apple-system, sans-serif; color: var(--rotta-orange); font-style: italic; font-weight: 900; }
+        .wpp-text { font-size: 17px; font-weight: 500; color: #555; line-height: 1.4; margin-bottom: 40px; }
+        .wpp-btn {
+            background: var(--wpp-green); color: #fff; border: none; width: 100%; padding: 18px; border-radius: 30px;
+            font-size: 16px; font-weight: 700; cursor: pointer; transition: transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(37, 211, 102, 0.3);
+        }
+        .wpp-btn:active { transform: scale(0.96); }
+
+        /* CAMADA DE PROFUNDIDADE OLED (Sombra Interna sobre a tela) */
+        .oled-depth {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: 70;
+            pointer-events: none;
+        }
+
+        /* ================= SISTEMA DO TUTORIAL - BALÕES GLOBAIS ================= */
+        .tutorial-highlight {
+            box-shadow: 0 0 0 3px rgba(242, 133, 34, 0.9), 0 0 20px rgba(242, 133, 34, 0.6) !important;
+            border-color: rgba(242, 133, 34, 1) !important;
+            animation: highlight-pulse 1.5s infinite;
+        }
+        @keyframes highlight-pulse {
+            0% { box-shadow: 0 0 0 3px rgba(242, 133, 34, 0.9), 0 0 15px rgba(242, 133, 34, 0.4); }
+            50% { box-shadow: 0 0 0 5px rgba(242, 133, 34, 0.5), 0 0 25px rgba(242, 133, 34, 0.8); }
+            100% { box-shadow: 0 0 0 3px rgba(242, 133, 34, 0.9), 0 0 15px rgba(242, 133, 34, 0.4); }
+        }
+
+        .global-speech-bubble {
+            position: fixed; background: rgba(255, 255, 255, 0.95); color: #111; padding: 14px 20px;
+            border-radius: 16px; font-size: 14px; font-weight: 600; text-align: center; width: max-content;
+            max-width: 260px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); opacity: 0; pointer-events: none;
+            transition: opacity 0.4s ease, transform 0.6s cubic-bezier(0.32, 0.72, 0, 1); z-index: 10000;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        }
+        .global-speech-bubble::after { content: ''; position: absolute; left: 50%; margin-left: -8px; border-width: 8px; border-style: solid; }
+        .global-speech-bubble.top { transform: translateY(15px); }
+        .global-speech-bubble.top.visible { opacity: 1; transform: translateY(0); }
+        .global-speech-bubble.top::after { top: 100%; border-color: rgba(255, 255, 255, 0.95) transparent transparent transparent; }
+        .global-speech-bubble.bottom { transform: translateY(-15px); }
+        .global-speech-bubble.bottom.visible { opacity: 1; transform: translateY(0); }
+        .global-speech-bubble.bottom::after { bottom: 100%; border-color: transparent transparent rgba(255, 255, 255, 0.95) transparent; }
+
+        /* ================= INDICADOR DE TOQUE (DEDO FANTASMA) ================= */
+        #touch-indicator {
+            position: fixed; width: 40px; height: 40px; background: rgba(242, 133, 34, 0.2); border: 2px solid rgba(242, 133, 34, 0.8);
+            border-radius: 50%; pointer-events: none; z-index: 10002; transform: translate(-50%, -50%); opacity: 0;
+            transition: left 0.7s cubic-bezier(0.32, 0.72, 0, 1), top 0.7s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s;
+            box-shadow: 0 4px 15px rgba(242, 133, 34, 0.3);
+        }
+        #touch-indicator::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 14px; height: 14px; background: rgba(242, 133, 34, 0.9); border-radius: 50%; }
+        #touch-indicator.pressing { transform: translate(-50%, -50%) scale(0.6); background: rgba(242, 133, 34, 0.5); transition: transform 0.25s cubic-bezier(0.32, 0.72, 0, 1), background 0.25s; }
+
+    </style>
+</head>
+<body>
+
+    <!-- DEFINIÇÃO DA SUPERELIPSE (SQUIRCLE) E FILTROS -->
+    <svg width="0" height="0" style="position: absolute;">
+      <defs>
+        <clipPath id="screen-clip" clipPathUnits="userSpaceOnUse">
+            <path d="M 60,14 L 320,14 C 352,14 366,28 366,60 L 366,760 C 366,792 352,806 320,806 L 60,806 C 28,806 14,792 14,760 L 14,60 C 14,28 28,14 60,14 Z" />
+        </clipPath>
+        <clipPath id="chassis-clip" clipPathUnits="userSpaceOnUse">
+            <path d="M 60,0 L 320,0 C 360,0 380,20 380,60 L 380,760 C 380,800 360,820 320,820 L 60,820 C 20,820 0,800 0,760 L 0,60 C 0,20 20,0 60,0 Z" />
+        </clipPath>
+        <filter id="inner-shadow-blur">
+            <feGaussianBlur stdDeviation="2" />
+        </filter>
+      </defs>
+    </svg>
+
+    <div id="scene">
+        <div class="phone-wrapper">
+            <!-- Botões Físicos Reais com Chanfros -->
+            <div class="button-mute"></div>
+            <div class="button-vol-up"></div>
+            <div class="button-vol-down"></div>
+            <div class="button-power"></div>
+            
+            <!-- Antenas do iPhone -->
+            <div class="antenna-band antenna-tl"></div>
+            <div class="antenna-band antenna-tr"></div>
+            <div class="antenna-band antenna-bl"></div>
+            <div class="antenna-band antenna-br"></div>
+
+            <!-- SVG CHASSIS: Corpo de Titânio e Bezel -->
+            <svg class="chassis-svg" width="380" height="820" viewBox="0 0 380 820" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="titanium-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#b5b5b6"/>
+                        <stop offset="5%" stop-color="#4a4a4c"/>
+                        <stop offset="25%" stop-color="#2c2c2e"/>
+                        <stop offset="50%" stop-color="#5a5a5c"/>
+                        <stop offset="75%" stop-color="#1a1a1c"/>
+                        <stop offset="95%" stop-color="#4a4a4c"/>
+                        <stop offset="100%" stop-color="#b5b5b6"/>
+                    </linearGradient>
+                    <linearGradient id="edge-highlight" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="rgba(255,255,255,0.5)"/>
+                        <stop offset="15%" stop-color="rgba(255,255,255,0.0)"/>
+                        <stop offset="85%" stop-color="rgba(255,255,255,0.0)"/>
+                        <stop offset="100%" stop-color="rgba(255,255,255,0.3)"/>
+                    </linearGradient>
+                </defs>
+                <path d="M 60,0 L 320,0 C 360,0 380,20 380,60 L 380,760 C 380,800 360,820 320,820 L 60,820 C 20,820 0,800 0,760 L 0,60 C 0,20 20,0 60,0 Z" fill="url(#titanium-grad)" />
+                <path d="M 60,1 L 320,1 C 359,1 379,21 379,60 L 379,760 C 379,799 359,819 320,819 L 60,819 C 21,819 1,799 1,760 L 1,60 C 1,21 21,1 60,1 Z" fill="none" stroke="url(#edge-highlight)" stroke-width="2" />
+                <path d="M 60,4 L 320,4 C 357,4 376,19 376,60 L 376,760 C 376,801 357,816 320,816 L 60,816 C 23,816 4,801 4,760 L 4,60 C 4,19 23,4 60,4 Z" fill="#000" />
+            </svg>
+
+            <!-- CONTEÚDO DA TELA -->
+            <div class="screen" id="app-screen">
+                
+                <div class="status-bar" id="status-bar">
+                    <span id="clock">09:41</span>
+                    <div class="status-icons">
+                        <svg width="18" height="12" viewBox="0 0 18 12" fill="none"><rect y="8" width="3" height="4" rx="1" fill="white"/><rect x="5" y="5" width="3" height="7" rx="1" fill="white"/><rect x="10" y="2" width="3" height="10" rx="1" fill="white"/><rect x="15" width="3" height="12" rx="1" fill="white"/></svg>
+                        <svg width="16" height="12" viewBox="0 0 16 12" fill="none"><path d="M8 12C8.82843 12 9.5 11.3284 9.5 10.5C9.5 9.67157 8.82843 9 8 9C7.17157 9 6.5 9.67157 6.5 10.5C6.5 11.3284 7.17157 12 8 12Z" fill="white"/><path class="stroke-icon" d="M11.535 6.46484C9.582 4.51184 6.417 4.51184 4.464 6.46484" stroke="white" stroke-width="2" stroke-linecap="round"/><path class="stroke-icon" d="M14.364 3.63574C10.849 0.120742 5.151 0.120742 1.636 3.63574" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>
+                        <span class="battery-percentage">67%</span>
+                        <div class="battery"><div class="battery-fill"></div></div>
+                    </div>
+                </div>
+
+                <!-- DYNAMIC ISLAND C/ SENSORES REAIS 95% OCULTOS -->
+                <div class="dynamic-island" id="dynamic-island">
+                    <div class="island-sensors">
+                        <!-- Sensor Infravermelho FaceID -->
+                        <div class="sensor-faceid"></div>
+                        <!-- Câmera Frontal -->
+                        <div class="sensor-camera"></div>
+                    </div>
+                </div>
+
+                <div class="home-screen" id="home-screen">
+                    <div class="app-grid">
+                        <div class="app-icon-wrapper" id="tutorial-safari" onclick="openApp('app-safari', true)">
+                            <div class="app-icon icon-safari"></div>
+                            <div class="app-name">Safari</div>
+                        </div>
+                    </div>
+                    <div class="dock">
+                        <div class="app-icon-wrapper"><div class="app-icon" style="background:#34c759; color:white;">📞</div></div>
+                        <div class="app-icon-wrapper"><div class="app-icon" style="background:#5ac8fa; color:white;">🌐</div></div>
+                        <div class="app-icon-wrapper"><div class="app-icon" style="background:#ff3b30; color:white;">🎵</div></div>
+                        <div class="app-icon-wrapper"><div class="app-icon" style="background:#5856d6; color:white;">✉️</div></div>
+                    </div>
+                </div>
+
+                <div class="app-window" id="app-safari" style="background: #111;">
+                    <div class="ios-nav-bar" style="background: rgba(40,40,45,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: none;">
+                        <button class="ios-back-btn" onclick="closeApp()">Voltar</button>
+                        <div class="safari-url-bar" style="background: #333; color: white;">
+                            <span>AA</span> www.rottabrasilexpress.com.br <span style="font-size: 16px;">↻</span>
+                            <div class="safari-progress-bar" id="safari-loader"></div>
+                        </div>
+                    </div>
+
+                    <div class="rotta-container">
+                        <div class="rotta-scroll-wrapper" id="rotta-scroll">
+                            <div class="rotta-content">
+                                <div class="rotta-header">
+                                    <div class="rotta-logo">Rotta Brasil <span class="express">Express</span></div>
+                                    <div class="rotta-sub">ESPECIALISTA EM MUDANÇAS INTERESTADUAIS</div>
+                                    <div class="rotta-title-desc">DESCUBRA O VALOR DA SUA MUDANÇA EM SEGUNDOS</div>
+                                </div>
+
+                                <div class="rotta-card" id="card-container">
+                                    
+                                    <!-- ================= PASSO 1 ================= -->
+                                    <div id="step-1" class="step-container active">
+                                        <div class="rotta-step-title">
+                                            <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+                                            1. Contato e Endereços
+                                        </div>
+                                        <div class="rotta-group-title"><div class="dot green"></div> DADOS DE CONTATO</div>
+                                        <div class="rotta-row">
+                                            <div class="rotta-input-group" style="flex: 1;" id="group-nome">
+                                                <input type="text" id="input-nome" class="rotta-input" placeholder="Seu Nome Completo">
+                                                <span class="input-icon">👤</span>
+                                            </div>
+                                            <div class="rotta-input-group" style="flex: 1;" id="group-telefone">
+                                                <input type="tel" id="input-telefone" class="rotta-input" placeholder="(DDD) 99999-9999">
+                                                <span class="input-icon">📞</span>
+                                            </div>
+                                        </div>
+                                        <div class="rotta-group-title" style="margin-top: 15px;"><div class="dot orange"></div> ORIGEM</div>
+                                        <div class="rotta-input-group" id="group-origem">
+                                            <input type="text" id="input-origem" class="rotta-input" placeholder="Rua, Número, Bairro, Cidade - SP">
+                                            <span class="input-icon">📍</span>
+                                        </div>
+                                        <div class="rotta-toggles">
+                                            <button id="btn-origem-casa" class="rotta-toggle-btn active" onclick="toggleBtn(this)">CASA</button>
+                                            <button id="btn-origem-apto" class="rotta-toggle-btn" onclick="toggleBtn(this)">APTO</button>
+                                        </div>
+                                        <div class="rotta-group-title" style="margin-top: 20px;"><div class="dot blue"></div> DESTINO</div>
+                                        <div class="rotta-input-group" id="group-destino">
+                                            <input type="text" id="input-destino" class="rotta-input" placeholder="Rua, Número, Bairro, Cidade - SP">
+                                            <span class="input-icon">⚑</span>
+                                        </div>
+                                        <div class="rotta-toggles">
+                                            <button id="btn-destino-casa" class="rotta-toggle-btn active" onclick="toggleBtn(this)">CASA</button>
+                                            <button id="btn-destino-apto" class="rotta-toggle-btn" onclick="toggleBtn(this)">APTO</button>
+                                        </div>
+                                        <button id="btn-submit-step1" class="rotta-submit" onclick="goToStep(2)">Próximo Passo</button>
+                                    </div>
+
+                                    <!-- ================= PASSO 2 ================= -->
+                                    <div id="step-2" class="step-container">
+                                        <div class="rotta-step-title" style="margin-bottom: 10px;">
+                                            <svg viewBox="0 0 24 24"><path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"/></svg>
+                                            2. Data da Mudança
+                                        </div>
+                                        <p class="rotta-step-subtitle">Selecione o dia planejado para o transporte dos seus itens.</p>
+                                        <div class="rotta-group-title">DATA DA MUDANÇA</div>
+                                        <div class="rotta-input-group" id="group-data">
+                                            <input type="text" id="input-data" class="rotta-input" placeholder="dd/mm/aaaa" style="font-weight: bold;">
+                                            <span class="input-icon">📅</span>
+                                        </div>
+                                        <div class="rotta-flex-row" id="row-flex" onclick="toggleFlexibility()">
+                                            <div class="ios-toggle-switch" id="toggle-flex">
+                                                <div class="ios-toggle-knob"></div>
+                                            </div>
+                                            <label style="cursor: pointer;">Tenho flexibilidade de datas (Janela de Coleta)</label>
+                                        </div>
+                                        <div class="rotta-availability-box" id="box-disponibilidade">
+                                            <svg class="badge-icon-svg" viewBox="0 0 24 24">
+                                                <path d="M23 11.99l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 11.99l2.44 2.79-.34 3.7 3.61.82L8.6 22.5l3.4-1.47 3.4 1.46 1.89-3.19 3.61-.82-.34-3.69L23 11.99zm-4.39 1.49l.23 2.51-2.46.56-1.29 2.18-2.32-.99-2.32.99-1.29-2.18-2.46-.56.23-2.51L5.3 11.99l1.63-1.86-.23-2.51 2.46-.56 1.29-2.18 2.32.99 2.32-.99 1.29 2.18 2.46.56-.23 2.51 1.63 1.86-1.63 1.87z"/>
+                                                <path d="M10.59 15.41L7 11.83l1.41-1.41 2.18 2.18 5.66-5.66L17.66 8l-7.07 7.41z"/>
+                                            </svg>
+                                            <div class="avail-text">Disponibilidade</div>
+                                            <div class="avail-status">CONFIRMADA</div>
+                                        </div>
+                                        <div class="rotta-footer-buttons">
+                                            <button class="rotta-btn-secondary" onclick="goToStep(1)">Voltar</button>
+                                            <button id="btn-submit-step2" class="rotta-submit" onclick="goToStep(3)">Próximo Passo</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- ================= PASSO 3 ================= -->
+                                    <div id="step-3" class="step-container">
+                                        <div class="rotta-step-title" style="margin-bottom: 20px;">
+                                            <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/></svg>
+                                            3. Seleção de Equipe
+                                        </div>
+                                        <div class="rotta-subpanel" id="panel-ajudantes">
+                                            <div class="subpanel-title">Ajudantes</div>
+                                            <div class="subpanel-subtitle">Carregamento e descarga</div>
+                                            <div class="counter-row">
+                                                <span>Ajudantes na Origem</span>
+                                                <div class="counter-controls">
+                                                    <button class="counter-btn" onclick="updateCounter('origem', -1)">-</button>
+                                                    <span class="counter-val" id="count-origem">0</span>
+                                                    <button class="counter-btn" id="btn-add-origem" onclick="updateCounter('origem', 1)">+</button>
+                                                </div>
+                                            </div>
+                                            <div class="counter-row">
+                                                <span>Ajudantes no Destino</span>
+                                                <div class="counter-controls">
+                                                    <button class="counter-btn" onclick="updateCounter('destino', -1)">-</button>
+                                                    <span class="counter-val" id="count-destino">0</span>
+                                                    <button class="counter-btn" onclick="updateCounter('destino', 1)">+</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="rotta-subpanel">
+                                            <div class="subpanel-header">
+                                                <div class="subpanel-title">Serviço de Montagem</div>
+                                                <svg style="fill: var(--rotta-orange); width: 14px; height: 14px;" viewBox="0 0 24 24"><path d="M22.7 19l-9.1-9.1c.9-2.3.4-5-1.5-6.9-2-2-5-2.4-7.4-1.3L9 6 6 9 1.6 4.7C.5 7.1.9 10.1 2.9 12.1c1.9 1.9 4.6 2.4 6.9 1.5l9.1 9.1c.4.4 1 .4 1.4 0l2.3-2.3c.5-.4.5-1.1.1-1.4z"/></svg>
+                                            </div>
+                                            <div class="rotta-checkbox-row" id="row-desmontagem" onclick="toggleDynamicField('chk-desmontagem', 'dyn-desmontagem')">
+                                                <div class="rotta-checkbox" id="chk-desmontagem"></div>
+                                                <span>Desmontagem (na Origem)</span>
+                                            </div>
+                                            <div class="dynamic-area" id="dyn-desmontagem">
+                                                <textarea id="input-desmontagem" class="rotta-input" rows="2" placeholder="Quais móveis? (Ex: Guarda-roupa 6 portas)"></textarea>
+                                            </div>
+                                            <div class="rotta-checkbox-row" onclick="toggleDynamicField('chk-montagem', 'dyn-montagem')">
+                                                <div class="rotta-checkbox" id="chk-montagem"></div>
+                                                <span>Montagem (no Destino)</span>
+                                            </div>
+                                            <div class="dynamic-area" id="dyn-montagem">
+                                                <textarea class="rotta-input" rows="2" placeholder="Quais móveis? (Ex: Cama de casal)"></textarea>
+                                            </div>
+                                        </div>
+                                        <div class="rotta-subpanel">
+                                            <div class="subpanel-header" id="row-embaladores" style="margin-bottom: 0; cursor:pointer;" onclick="togglePackerOptions()">
+                                                <div>
+                                                    <div class="subpanel-title">Embaladores</div>
+                                                    <div class="subpanel-subtitle orange">DISPONÍVEL APENAS NA ORIGEM</div>
+                                                </div>
+                                                <div class="rotta-checkbox" id="chk-embaladores"></div>
+                                            </div>
+                                            <div class="dynamic-area" id="dyn-embaladores">
+                                                <div class="rotta-radio-row" onclick="selectPackerType('todos')">
+                                                    <div class="rotta-radio checked" id="rad-todos"></div>
+                                                    <span>Embalar todos os itens</span>
+                                                </div>
+                                                <div class="rotta-radio-row" id="row-especificos" onclick="selectPackerType('especificos')">
+                                                    <div class="rotta-radio" id="rad-especificos"></div>
+                                                    <span>Embalar móveis específicos</span>
+                                                </div>
+                                                <div class="dynamic-area" id="dyn-packer-items" style="margin-top: 8px;">
+                                                    <textarea id="input-packer-items" class="rotta-input" rows="2" placeholder="Descreva o que embalar..."></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="rotta-footer-buttons">
+                                            <button class="rotta-btn-secondary" onclick="goToStep(2)">Voltar</button>
+                                            <button id="btn-submit-step3" class="rotta-submit" onclick="goToStep(4)">Próximo Passo</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- ================= PASSO 4 ================= -->
+                                    <div id="step-4" class="step-container">
+                                        <div class="rotta-step-title" style="margin-bottom: 15px;">
+                                            <svg viewBox="0 0 24 24"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+                                            4. Lista de Itens
+                                        </div>
+                                        <div class="rotta-warning-box" id="warning-lista">
+                                            <div class="warning-title">ATENÇÃO</div>
+                                            <div class="warning-text">O tamanho do caminhão e o valor do orçamento dependem da precisão desta lista.</div>
+                                        </div>
+                                        <div class="rotta-row">
+                                            <div style="flex: 1;">
+                                                <div class="rotta-group-title">CAIXAS</div>
+                                                <div class="rotta-input-group" id="group-caixas">
+                                                    <select id="select-caixas" class="rotta-input">
+                                                        <option value="">Selecione...</option>
+                                                        <option value="0">Nenhuma</option>
+                                                        <option value="10">1 a 10</option>
+                                                        <option value="20">11 a 20</option>
+                                                        <option value="30">21 a 30</option>
+                                                        <option value="50">31 a 50</option>
+                                                        <option value="51+">Mais de 50</option>
+                                                    </select>
+                                                    <span class="input-icon">⌄</span>
+                                                </div>
+                                            </div>
+                                            <div style="flex: 1;">
+                                                <div class="rotta-group-title">SACOS</div>
+                                                <div class="rotta-input-group" id="group-sacos">
+                                                    <select id="select-sacos" class="rotta-input">
+                                                        <option value="">Selecione...</option>
+                                                        <option value="0">Nenhum</option>
+                                                        <option value="5">1 a 5</option>
+                                                        <option value="10">6 a 10</option>
+                                                        <option value="20">11 a 20</option>
+                                                        <option value="21+">Mais de 20</option>
+                                                    </select>
+                                                    <span class="input-icon">⌄</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="rotta-group-title" style="margin-top: 15px;">MÓVEIS E ELETRODOMÉSTICOS</div>
+                                        <textarea id="input-lista-moveis" class="rotta-input" rows="4" placeholder="Ex: 1 Geladeira Inverse..."></textarea>
+                                        <div style="text-align: right; font-size: 10px; font-weight: bold; margin-top: 5px; color: #aaa;" id="char-count">0 / 9000</div>
+                                        <div class="rotta-checkbox-row" id="row-privacidade" onclick="toggleCheckbox('chk-privacidade')" style="margin-top:20px; align-items: flex-start;">
+                                            <div class="rotta-checkbox" id="chk-privacidade"></div>
+                                            <span style="font-size:12px; font-weight: normal; color: #ddd; line-height: 1.4;">Eu li e concordo com a <span style="color:var(--rotta-orange); text-decoration: underline;">Política de Privacidade</span>.</span>
+                                        </div>
+                                        <div class="rotta-footer-buttons">
+                                            <button class="rotta-btn-secondary" onclick="goToStep(3)">Voltar</button>
+                                            <button id="btn-submit-step4" class="rotta-submit" onclick="submitFinal()">Finalizar Cotação</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tela Final WhatsApp -->
+                    <div class="whatsapp-overlay" id="whatsapp-screen">
+                        <div class="wpp-check">✓</div>
+                        <div class="wpp-logo">Rotta Brasil <span class="express">Express</span></div>
+                        <p class="wpp-text">Sua cotação foi enviada com sucesso!<br>Clique no botão abaixo para nos enviar os detalhes pelo WhatsApp e agilizar seu atendimento.</p>
+                        <button id="btn-whatsapp" class="wpp-btn" onclick="resetForm()">
+                            <svg fill="#fff" width="24" height="24" viewBox="0 0 24 24"><path d="M12.031 0C5.385 0 .002 5.38.002 12.025c0 2.12.553 4.192 1.603 6.012L.004 24l6.104-1.601c1.765.967 3.774 1.477 5.92 1.477 6.647 0 12.026-5.38 12.026-12.026S18.678 0 12.031 0zm0 21.895c-1.785 0-3.518-.48-5.045-1.386l-.36-.214-3.75.984.998-3.657-.235-.374C2.55 15.42 2.012 13.765 2.012 12.025c0-5.535 4.5-10.015 10.02-10.015 5.518 0 10.015 4.5 10.015 10.015s-4.497 10.015-10.016 10.015zm5.503-7.535c-.302-.15-1.786-.88-2.062-.982-.276-.1-.476-.15-.678.15-.2.302-.782.982-.958 1.183-.176.2-.352.226-.654.075-1.29-.624-2.316-1.144-3.197-2.61-.176-.301-.018-.466.133-.616.136-.135.302-.351.453-.526.15-.176.2-.301.301-.502.101-.2.05-.376-.025-.526-.075-.15-.678-1.63-.928-2.23-.245-.584-.492-.505-.678-.515-.175-.01-.376-.01-.577-.01-.2 0-.527.075-.803.376-.276.302-1.055 1.03-1.055 2.51 0 1.48 1.08 2.91 1.231 3.111.15.2 2.11 3.224 5.11 4.526 1.954.846 2.766.915 3.738.775.81-.116 2.457-.966 2.793-1.928.337-.966.337-1.795.236-1.97-.101-.175-.377-.275-.678-.425z"/></svg>
+                            Enviar via WhatsApp
+                        </button>
+                    </div>
+
+                    <!-- CAMADA DE PROFUNDIDADE DO OLED (Sombra Interna sobre a tela) -->
+                    <svg class="oled-depth" viewBox="0 0 380 820" preserveAspectRatio="none">
+                        <!-- Sombra esfumaçada -->
+                        <path d="M 60,14 L 320,14 C 352,14 366,28 366,60 L 366,760 C 366,792 352,806 320,806 L 60,806 C 28,806 14,792 14,760 L 14,60 C 14,28 28,14 60,14 Z" fill="none" stroke="rgba(0,0,0,0.8)" stroke-width="6" filter="url(#inner-shadow-blur)" />
+                        <!-- Linha rígida do vinco -->
+                        <path d="M 60,14 L 320,14 C 352,14 366,28 366,60 L 366,760 C 366,792 352,806 320,806 L 60,806 C 28,806 14,792 14,760 L 14,60 C 14,28 28,14 60,14 Z" fill="none" stroke="rgba(0,0,0,0.6)" stroke-width="1.5" />
+                    </svg>
+
+                    <div class="home-indicator-container" id="home-indicator" onclick="closeApp()">
+                        <div class="home-indicator"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ================= MOTOR DE ÁUDIO =================
+        let audioCtx;
+        let noiseBuffer;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (!noiseBuffer && audioCtx) {
+                const bufferSize = audioCtx.sampleRate * 0.1;
+                noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+                const output = noiseBuffer.getChannelData(0);
+                for (let i = 0; i < bufferSize; i++) output[i] = Math.random() * 2 - 1;
+            }
+        }
+
+        function playRealisticAudio(type = 'tap') {
+            if (!audioCtx) initAudio();
+            if (audioCtx && audioCtx.state === 'suspended') return;
+            const time = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const oscGain = audioCtx.createGain();
+            const noiseSrc = audioCtx.createBufferSource();
+            const noiseFilter = audioCtx.createBiquadFilter();
+            const noiseGain = audioCtx.createGain();
+            noiseSrc.buffer = noiseBuffer;
+            noiseFilter.type = 'bandpass';
+            osc.type = 'sine';
+
+            if (type === 'type') {
+                osc.frequency.setValueAtTime(400 + Math.random() * 100, time);
+                osc.frequency.exponentialRampToValueAtTime(100, time + 0.015);
+                oscGain.gain.setValueAtTime(0, time);
+                oscGain.gain.linearRampToValueAtTime(0.08, time + 0.001);
+                oscGain.gain.exponentialRampToValueAtTime(0.001, time + 0.015);
+                noiseFilter.frequency.value = 5000;
+                noiseGain.gain.setValueAtTime(0, time);
+                noiseGain.gain.linearRampToValueAtTime(0.04, time + 0.001);
+                noiseGain.gain.exponentialRampToValueAtTime(0.001, time + 0.015);
+                osc.start(time); osc.stop(time + 0.015);
+                noiseSrc.start(time); noiseSrc.stop(time + 0.015);
+            } else {
+                osc.frequency.setValueAtTime(300, time);
+                osc.frequency.exponentialRampToValueAtTime(50, time + 0.02);
+                oscGain.gain.setValueAtTime(0, time);
+                oscGain.gain.linearRampToValueAtTime(0.2, time + 0.002);
+                oscGain.gain.exponentialRampToValueAtTime(0.001, time + 0.02);
+                noiseFilter.frequency.value = 2500;
+                noiseGain.gain.setValueAtTime(0, time);
+                noiseGain.gain.linearRampToValueAtTime(0.12, time + 0.002);
+                oscGain.gain.exponentialRampToValueAtTime(0.001, time + 0.02);
+                osc.start(time); osc.stop(time + 0.02);
+                noiseSrc.start(time); noiseSrc.stop(time + 0.02);
+            }
+            osc.connect(oscGain); oscGain.connect(audioCtx.destination);
+            noiseSrc.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(audioCtx.destination);
+        }
+
+        // ================= SISTEMA IOS =================
+        let isTutorialRunning = true;
+        let currentStep = 1;
+        const island = document.getElementById('dynamic-island');
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+        }
+        setInterval(updateClock, 1000); updateClock();
+
+        let activeApp = null;
+        function openApp(appId, isDarkModeApp) {
+            document.getElementById('home-screen').classList.add('hidden');
+            const app = document.getElementById(appId);
+            if (app) { app.classList.add('active'); activeApp = app; }
+            if (!isDarkModeApp) {
+                document.getElementById('status-bar').classList.add('dark-mode');
+                document.getElementById('home-indicator').classList.add('dark-mode-indicator');
+            }
+        }
+        function closeApp() {
+            if (!activeApp) return; 
+            activeApp.classList.remove('active'); activeApp = null;
+            document.getElementById('home-screen').classList.remove('hidden');
+            document.getElementById('status-bar').classList.remove('dark-mode');
+            document.getElementById('home-indicator').classList.remove('dark-mode-indicator');
+        }
+
+        // ================= MÁSCARAS E UX DOS INPUTS =================
+
+        function applyPhoneMask(e) {
+            let value = e.target.value.replace(/\D/g, "");
+            if (value.length > 11) value = value.slice(0, 11);
+            if (value.length > 10) {
+                value = value.replace(/^(\d{2})(\d{5})(\d{4}).*/, "($1) $2-$3");
+            } else if (value.length > 6) {
+                value = value.replace(/^(\d{2})(\d{4})(\d{0,4}).*/, "($1) $2-$3");
+            } else if (value.length > 2) {
+                value = value.replace(/^(\d{2})(\d{0,5})/, "($1) $2");
+            } else if (value.length > 0) {
+                value = value.replace(/^(\d{0,2})/, "($1");
+            }
+            e.target.value = value;
+        }
+
+        function applyDateMask(e) {
+            let value = e.target.value.replace(/\D/g, "");
+            if (value.length > 8) value = value.slice(0, 8);
+            if (value.length > 4) {
+                value = value.replace(/^(\d{2})(\d{2})(\d{0,4}).*/, "$1/$2/$3");
+            } else if (value.length > 2) {
+                value = value.replace(/^(\d{2})(\d{0,2})/, "$1/$2");
+            }
+            e.target.value = value;
+        }
+
+        document.getElementById('input-telefone').addEventListener('input', applyPhoneMask);
+        document.getElementById('input-data').addEventListener('input', applyDateMask);
+
+        // ================= LÓGICA FORMULÁRIO =================
+        function toggleBtn(el) {
+            el.parentElement.querySelectorAll('.rotta-toggle-btn').forEach(b => b.classList.remove('active'));
+            el.classList.add('active');
+        }
+        function toggleFlexibility() { document.getElementById('toggle-flex').classList.toggle('active'); }
+        function updateCounter(t, d) {
+            const el = document.getElementById('count-' + t);
+            let v = parseInt(el.innerText) + d;
+            if(v >= 0) el.innerText = v;
+        }
+        function toggleDynamicField(chkId, dynId) {
+            const chk = document.getElementById(chkId);
+            const dyn = document.getElementById(dynId);
+            chk.classList.toggle('checked');
+            dyn.classList.toggle('open', chk.classList.contains('checked'));
+        }
+        function toggleCheckbox(id) { document.getElementById(id).classList.toggle('checked'); }
+        function togglePackerOptions() {
+            const chk = document.getElementById('chk-embaladores');
+            if(chk) {
+                chk.classList.toggle('checked');
+                document.getElementById('dyn-embaladores').classList.toggle('open', chk.classList.contains('checked'));
+            }
+        }
+        function selectPackerType(t) {
+            document.getElementById('rad-todos').classList.toggle('checked', t === 'todos');
+            document.getElementById('rad-especificos').classList.toggle('checked', t === 'especificos');
+            document.getElementById('dyn-packer-items').classList.toggle('open', t === 'especificos');
+        }
+        document.getElementById('input-lista-moveis').addEventListener('input', function() {
+            document.getElementById('char-count').innerText = this.value.length + " / 9000";
+        });
+
+        async function goToStep(n) {
+            if (n === currentStep) return;
+            const direction = n > currentStep ? 'next' : 'prev';
+            const oldStep = document.getElementById('step-' + currentStep);
+            const newStep = document.getElementById('step-' + n);
+            const loader = document.getElementById('safari-loader');
+
+            loader.classList.add('loading');
+            
+            document.querySelectorAll('.step-container').forEach(s => {
+                s.classList.remove('active', 'exit-left', 'exit-right', 'enter-left', 'enter-right');
+            });
+
+            if (direction === 'next') {
+                oldStep.classList.add('exit-left');
+                newStep.classList.add('enter-right');
+            } else {
+                oldStep.classList.add('exit-right');
+                newStep.classList.add('enter-left');
+            }
+
+            newStep.offsetHeight;
+
+            setTimeout(() => {
+                newStep.classList.add('active');
+                newStep.classList.remove('enter-right', 'enter-left');
+                setTimeout(() => {
+                    loader.style.opacity = '0';
+                    setTimeout(() => {
+                        loader.classList.remove('loading');
+                        loader.style.opacity = '';
+                    }, 200);
+                }, 300);
+            }, 50);
+
+            currentStep = n;
+            document.getElementById('rotta-scroll').scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function submitFinal() {
+            document.getElementById('whatsapp-screen').classList.add('active');
+            document.getElementById('status-bar').classList.add('dark-mode');
+        }
+
+        function resetForm() {
+            document.getElementById('whatsapp-screen').classList.remove('active');
+            document.getElementById('status-bar').classList.remove('dark-mode');
+            document.querySelectorAll('.rotta-input').forEach(el => el.value = '');
+            document.getElementById('rotta-scroll').scrollTo({ top: 0, behavior: 'instant' });
+            document.getElementById('box-disponibilidade').classList.remove('show');
+            document.getElementById('toggle-flex').classList.remove('active');
+            document.getElementById('select-caixas').value = '';
+            document.getElementById('select-sacos').value = '';
+            document.getElementById('count-origem').innerText = '0';
+            document.getElementById('count-destino').innerText = '0';
+            document.querySelectorAll('.rotta-checkbox').forEach(chk => chk.classList.remove('checked'));
+            document.querySelectorAll('.dynamic-area').forEach(dyn => dyn.classList.remove('open'));
+            selectPackerType('todos');
+            currentStep = 1;
+            document.querySelectorAll('.step-container').forEach(s => {
+                s.classList.remove('active', 'exit-left', 'exit-right', 'enter-left', 'enter-right');
+            });
+            document.getElementById('step-1').classList.add('active');
+            closeApp();
+        }
+
+        // ================= MOTOR TUTORIAL =================
+        const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+        async function showBubble(targetId, text, position = 'top') {
+            if (!isTutorialRunning) return;
+            const target = document.getElementById(targetId);
+            if(!target) return;
+            target.classList.add('tutorial-highlight');
+            let overlay = document.getElementById('bubble-overlay') || document.createElement('div');
+            overlay.id = 'bubble-overlay'; document.body.appendChild(overlay);
+            const bubble = document.createElement('div');
+            bubble.className = `global-speech-bubble ${position}`; bubble.innerHTML = text; bubble.id = 'current-bubble';
+            overlay.appendChild(bubble);
+            const updatePos = () => {
+                const tr = target.getBoundingClientRect(); const br = bubble.getBoundingClientRect();
+                let l = tr.left + tr.width/2 - br.width/2;
+                l = Math.max(10, Math.min(l, window.innerWidth - br.width - 10));
+                let t = (position === 'bottom') ? tr.bottom + 15 : tr.top - br.height - 15;
+                bubble.style.left = l + 'px'; bubble.style.top = t + 'px';
+            };
+            updatePos(); await new Promise(r => requestAnimationFrame(r));
+            bubble.classList.add('visible'); bubble.style.opacity = '1';
+            await sleep(Math.max(2500, text.length * 65));
+        }
+
+        function removeBubble(id) {
+            const t = document.getElementById(id); if(t) t.classList.remove('tutorial-highlight');
+            const b = document.getElementById('current-bubble'); if(b) { b.classList.remove('visible'); setTimeout(() => b.remove(), 400); }
+        }
+
+        async function simulateTouch(id, scale = '0.96') {
+            if(!isTutorialRunning) return;
+            const t = document.getElementById(id); if(!t) return;
+            let ind = document.getElementById('touch-indicator') || document.createElement('div');
+            ind.id = 'touch-indicator'; document.body.appendChild(ind);
+            const tr = t.getBoundingClientRect();
+            ind.style.opacity = '1'; ind.style.left = (tr.left + tr.width/2) + 'px'; ind.style.top = (tr.top + tr.height/2) + 'px';
+            await sleep(600); if(!isTutorialRunning) return;
+            ind.classList.add('pressing');
+            const ot = t.style.transform; if(scale !== '1') t.style.transform = `scale(${scale})`;
+            playRealisticAudio('tap'); await sleep(150);
+            ind.classList.remove('pressing'); t.style.transform = ot; ind.style.opacity = '0'; await sleep(300);
+        }
+
+        async function typeNatural(id, text) {
+            if(!isTutorialRunning) return;
+            const el = document.getElementById(id); el.value = '';
+            for(let i=0; i<text.length; i++) {
+                if(!isTutorialRunning) break;
+                el.value += text[i]; el.dispatchEvent(new Event('input')); playRealisticAudio('type');
+                if(id === 'input-lista-moveis') document.getElementById('char-count').innerText = el.value.length + " / 9000";
+                await sleep(40 + Math.random()*30);
+            }
+        }
+
+        async function runInteractiveTutorial() {
+            while (isTutorialRunning) {
+                await sleep(1500);
+                await showBubble('tutorial-safari', 'Clique no Safari para iniciar sua cotação.', 'bottom');
+                await simulateTouch('tutorial-safari', '0.85'); removeBubble('tutorial-safari');
+                openApp('app-safari', true); await sleep(2000);
+
+                await showBubble('input-nome', 'Comece preenchendo seus dados de contato.', 'top');
+                await simulateTouch('input-nome', '1'); await typeNatural('input-nome', 'Carlos Almeida');
+                removeBubble('input-nome');
+                await showBubble('input-telefone', 'Informe seu telefone. Note a formatação automática!', 'top');
+                await simulateTouch('input-telefone', '1'); await typeNatural('input-telefone', '11987654321');
+                removeBubble('input-telefone');
+                await showBubble('input-origem', 'Qual o endereço de retirada?', 'top');
+                await simulateTouch('input-origem', '1'); await typeNatural('input-origem', 'Av. Paulista, 1000 - SP');
+                removeBubble('input-origem');
+                await showBubble('btn-origem-apto', 'Selecione se é Casa ou Apartamento.', 'bottom');
+                await simulateTouch('btn-origem-apto', '0.96'); toggleBtn(document.getElementById('btn-origem-apto'));
+                removeBubble('btn-origem-apto');
+                const scroll = document.getElementById('rotta-scroll');
+                scroll.scrollTo({ top: 300, behavior: 'smooth' }); await sleep(800);
+                await showBubble('input-destino', 'Agora informe o destino da mudança.', 'top');
+                await simulateTouch('input-destino', '1'); await typeNatural('input-destino', 'Rua das Flores, 123 - RJ');
+                removeBubble('input-destino');
+                await showBubble('btn-submit-step1', 'Tudo pronto. Vamos para a próxima etapa.', 'top');
+                await simulateTouch('btn-submit-step1', '0.96'); removeBubble('btn-submit-step1');
+                await goToStep(2); await sleep(1500);
+
+                await showBubble('input-data', 'Informe a data. O sistema bloqueia letras e formata o dia sozinho!', 'top');
+                await simulateTouch('input-data', '1'); await typeNatural('input-data', '25032026');
+                removeBubble('input-data');
+                document.getElementById('box-disponibilidade').classList.add('show');
+                await showBubble('box-disponibilidade', 'Confirmamos a disponibilidade instantaneamente.', 'bottom');
+                removeBubble('box-disponibilidade');
+                await showBubble('btn-submit-step2', 'Avançar para seleção de equipe.', 'top');
+                await simulateTouch('btn-submit-step2', '0.96'); removeBubble('btn-submit-step2');
+                await goToStep(3); await sleep(1500);
+
+                await showBubble('btn-add-origem', 'Adicione ajudantes extras conforme a necessidade.', 'bottom');
+                await simulateTouch('btn-add-origem', '0.9'); updateCounter('origem', 1); await sleep(100);
+                await simulateTouch('btn-add-origem', '0.9'); updateCounter('origem', 1);
+                removeBubble('btn-add-origem');
+                await showBubble('row-desmontagem', 'Solicite serviços de montagem e desmontagem.', 'bottom');
+                await simulateTouch('row-desmontagem', '1'); toggleDynamicField('chk-desmontagem', 'dyn-desmontagem');
+                removeBubble('row-desmontagem');
+                await showBubble('input-desmontagem', 'Informe quais móveis precisam do serviço.', 'bottom');
+                await typeNatural('input-desmontagem', '1 Guarda-roupa 6 portas');
+                removeBubble('input-desmontagem');
+                scroll.scrollTo({ top: 400, behavior: 'smooth' }); await sleep(800);
+                await showBubble('btn-submit-step3', 'Quase lá! Vamos listar os itens.', 'top');
+                await simulateTouch('btn-submit-step3', '0.96'); removeBubble('btn-submit-step3');
+                await goToStep(4); await sleep(1500);
+
+                await showBubble('warning-lista', 'A precisão desta lista é vital para o orçamento final.', 'bottom');
+                removeBubble('warning-lista');
+                await showBubble('group-caixas', 'Selecione a quantidade de caixas e sacos.', 'top');
+                document.getElementById('select-caixas').value = "20";
+                document.getElementById('select-sacos').value = "10";
+                removeBubble('group-caixas');
+                scroll.scrollTo({ top: 400, behavior: 'smooth' }); await sleep(800);
+                await showBubble('input-lista-moveis', 'Liste todos os seus móveis e eletrodomésticos.', 'top');
+                await typeNatural('input-lista-moveis', '1 Geladeira, 1 Sofá, 1 Cama, 1 Máquina de Lavar, 2 TVs.');
+                removeBubble('input-lista-moveis');
+                await showBubble('row-privacidade', 'Aceite os termos para finalizar.', 'top');
+                await simulateTouch('row-privacidade', '1'); toggleCheckbox('chk-privacidade');
+                removeBubble('row-privacidade');
+                await showBubble('btn-submit-step4', 'Finalize sua cotação agora.', 'top');
+                await simulateTouch('btn-submit-step4', '0.96'); removeBubble('btn-submit-step4');
+                submitFinal(); await sleep(2000);
+
+                await showBubble('btn-whatsapp', 'Clique para enviar via WhatsApp e receber seu orçamento!', 'top');
+                await simulateTouch('btn-whatsapp', '0.96'); removeBubble('btn-whatsapp');
+                resetForm(); await sleep(3000);
+            }
+        }
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                runInteractiveTutorial();
+                observer.disconnect(); // Runs only once
+            }
+        }, { threshold: 0.5 }); // Trigger when 50% of the simulator is visible
+
+        window.onload = () => {
+            observer.observe(document.getElementById('scene'));
+        };
+    </script>
+</body>
+</html>
