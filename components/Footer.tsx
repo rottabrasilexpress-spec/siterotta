@@ -192,7 +192,7 @@ const Footer: React.FC = () => {
             </p>
             <div className="flex items-center gap-3 justify-center md:justify-start mt-2">
                 <p className="text-gray-600 text-[10px]">
-                  CNPJ: 63.818.211/0001-56
+                  CNPJ: 65.645.298/0001-32
                 </p>
             </div>
           </div>
