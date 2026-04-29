@@ -15,6 +15,7 @@ import FAQ from './components/FAQ';
 import Footer from './components/Footer';
 import ChatWidget from './components/ChatWidget';
 import RealSimulation from './components/RealSimulation';
+import DiscountPopup from './components/DiscountPopup';
 import { FormData, FormErrors } from './types';
 
 const App: React.FC = () => {
@@ -398,6 +399,7 @@ const App: React.FC = () => {
 
         {/* Chat Widget Component Added Here */}
         <ChatWidget />
+        <DiscountPopup />
 
         {/* Sections with IDs */}
         <Differentials />
