@@ -6,6 +6,7 @@ const DiscountPopup: React.FC = () => {
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [whatsapp, setWhatsapp] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   // Initial load effect
   useEffect(() => {
@@ -55,15 +56,54 @@ const DiscountPopup: React.FC = () => {
     setStep(1);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (whatsapp.replace(/\D/g, '').length < 10) {
-      setError('Por favor, insira um número de WhatsApp válido.');
+      setError('Informe um WhatsApp válido com DDD.');
       return;
     }
     setError('');
-    sessionStorage.setItem('hasFilledDiscount', 'true');
-    setStep(3); // Success step
+    setIsLoading(true);
+
+    try {
+      const urlParams = new URLSearchParams(window.location.search);
+      const payload = {
+        origem: "popup_10_off",
+        empresa: "Rotta Brasil Express",
+        evento: "lead_desconto_popup",
+        whatsapp: whatsapp,
+        nome: "",
+        cupom: "10OFF",
+        desconto_prometido: "10%",
+        pagina_origem: window.location.href,
+        consentimento_whatsapp: true,
+        timestamp: new Date().toISOString(),
+        utm_source: urlParams.get('utm_source') || "",
+        utm_medium: urlParams.get('utm_medium') || "",
+        utm_campaign: urlParams.get('utm_campaign') || "",
+        utm_content: urlParams.get('utm_content') || "",
+        utm_term: urlParams.get('utm_term') || ""
+      };
+
+      const response = await fetch('https://saas.via-cargo.com/webhook/rotta-popup-10-off', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        sessionStorage.setItem('hasFilledDiscount', 'true');
+        setStep(3); // Success step
+      } else {
+        throw new Error('Falha na requisição');
+      }
+    } catch (err) {
+      setError('Não conseguimos registrar agora. Confira o número e tente novamente.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const formatPhone = (val: string) => {
@@ -95,6 +135,7 @@ const DiscountPopup: React.FC = () => {
               <button
                 onClick={handleCloseAttempt}
                 className="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors p-2 bg-white/5 rounded-full hover:bg-white/10"
+                disabled={isLoading}
               >
                 <span className="material-symbols-outlined text-lg">close</span>
               </button>
@@ -116,16 +157,21 @@ const DiscountPopup: React.FC = () => {
                       placeholder="(00) 00000-0000"
                       value={whatsapp}
                       onChange={(e) => setWhatsapp(formatPhone(e.target.value))}
-                      className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-brand-gold transition-colors text-center text-xl font-medium shadow-inner"
+                      disabled={isLoading}
+                      className="w-full bg-white/5 border border-white/20 rounded-xl px-4 py-4 text-white focus:outline-none focus:border-brand-gold transition-colors text-center text-xl font-medium shadow-inner disabled:opacity-50"
                     />
                     {error && <p className="text-red-400 text-xs mt-2 text-left">{error}</p>}
                   </div>
                   <button
                     type="submit"
-                    className="w-full bg-brand-gold text-brand-dark font-bold py-4 rounded-xl hover:bg-brand-goldHover transition-all shadow-lg text-lg transform hover:scale-[1.02]"
+                    disabled={isLoading}
+                    className="w-full bg-brand-gold text-brand-dark font-bold py-4 rounded-xl hover:bg-brand-goldHover transition-all shadow-lg text-lg transform hover:scale-[1.02] disabled:opacity-70 disabled:hover:scale-100"
                   >
-                    Garantir Meu Desconto
+                    {isLoading ? 'Garantindo desconto...' : 'Garantir Meu Desconto'}
                   </button>
+                  <p className="text-[10px] text-gray-400 mt-1 leading-tight px-2">
+                    Ao clicar, você autoriza a Rotta Brasil Express a chamar você no WhatsApp para continuar seu orçamento e garantir o desconto.
+                  </p>
                 </form>
               </div>
             )}
@@ -161,17 +207,15 @@ const DiscountPopup: React.FC = () => {
                 <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-5 shadow-[0_0_20px_rgba(34,197,94,0.4)]">
                   <span className="material-symbols-outlined text-white text-4xl">check_circle</span>
                 </div>
-                <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">Desconto Garantido!</h2>
+                <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">Desconto garantido!</h2>
                 <p className="text-gray-300 mb-8 text-sm leading-relaxed">
-                  Seu número foi cadastrado com sucesso! Você acaba de garantir <strong className="text-green-400">10% de desconto</strong> em seu orçamento.
-                  <br /><br />
-                  É só solicitar-nos o desconto quando receber o seu orçamento. Um de nossos agentes também irá chamá-lo diretamente no WhatsApp para passar os detalhes para você.
+                  Desconto garantido! Vamos chamar você no WhatsApp em instantes.
                 </p>
                 <button
                   onClick={() => setIsOpen(false)}
                   className="w-full bg-brand-gold text-brand-dark font-bold py-4 rounded-xl hover:bg-brand-goldHover transition-all shadow-lg text-lg transform hover:scale-[1.02]"
                 >
-                  Entendi, fechar
+                  Desconto Garantido!
                 </button>
               </div>
             )}
