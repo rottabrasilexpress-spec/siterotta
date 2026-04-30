@@ -68,13 +68,13 @@ const DiscountPopup: React.FC = () => {
     try {
       const urlParams = new URLSearchParams(window.location.search);
       const payload = {
-        origem: "popup_10_off",
+        origem: "popup_analise_rapida",
         empresa: "Rotta Brasil Express",
-        evento: "lead_desconto_popup",
+        evento: "lead_analise_rapida_popup",
         whatsapp: whatsapp,
         nome: "",
-        cupom: "10OFF",
-        desconto_prometido: "10%",
+        beneficio: "atendimento_prioritario",
+        solicitacao: "analise_rapida_mudanca",
         pagina_origem: window.location.href,
         consentimento_whatsapp: true,
         timestamp: new Date().toISOString(),
@@ -144,11 +144,12 @@ const DiscountPopup: React.FC = () => {
             {step === 1 && (
               <div className="text-center mt-2">
                 <div className="w-20 h-20 bg-gradient-to-br from-brand-gold to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-5 shadow-[0_0_20px_rgba(245,130,32,0.4)]">
-                  <span className="material-symbols-outlined text-brand-dark text-4xl">local_offer</span>
+                  <span className="material-symbols-outlined text-brand-dark text-4xl">support_agent</span>
                 </div>
-                <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">Ganhe 10% OFF!</h2>
+                <h2 className="text-3xl font-bold text-white mb-2 tracking-tight">Análise rápida da sua mudança</h2>
                 <p className="text-gray-300 mb-6 text-sm leading-relaxed">
-                  Estamos na semana de descontos especiais. Insira seu WhatsApp abaixo para garantir <strong className="text-brand-gold">10% de desconto</strong> no valor final do seu orçamento!
+                  Informe seu WhatsApp para receber atendimento prioritário e uma análise personalizada da sua mudança.<br/><br/>
+                  Nossa equipe vai te chamar para entender origem, destino, volume e melhor modalidade para o seu orçamento.
                 </p>
                 <form onSubmit={handleSubmit} className="flex flex-col gap-4">
                   <div>
@@ -167,10 +168,10 @@ const DiscountPopup: React.FC = () => {
                     disabled={isLoading}
                     className="w-full bg-brand-gold text-brand-dark font-bold py-4 rounded-xl hover:bg-brand-goldHover transition-all shadow-lg text-lg transform hover:scale-[1.02] disabled:opacity-70 disabled:hover:scale-100"
                   >
-                    {isLoading ? 'Garantindo desconto...' : 'Garantir Meu Desconto'}
+                    {isLoading ? 'Enviando...' : 'Receber Análise pelo WhatsApp'}
                   </button>
                   <p className="text-[10px] text-gray-400 mt-1 leading-tight px-2">
-                    Ao clicar, você autoriza a Rotta Brasil Express a chamar você no WhatsApp para continuar seu orçamento e garantir o desconto.
+                    Ao clicar, você autoriza a Rotta Brasil Express a chamar você no WhatsApp para continuar seu atendimento.
                   </p>
                 </form>
               </div>
@@ -183,20 +184,20 @@ const DiscountPopup: React.FC = () => {
                 </div>
                 <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">Espere!</h2>
                 <p className="text-gray-200 mb-8 text-sm leading-relaxed">
-                  Se você sair agora sem deixar o seu WhatsApp, irá <strong className="text-red-400 text-base">perder definitivamente um SUPER DESCONTO de 10%</strong> no seu orçamento! É uma oportunidade única.
+                  Se você sair agora sem deixar o seu WhatsApp, ficará sem a nossa <strong className="text-red-400 text-base">análise rápida e atendimento prioritário</strong>! É uma oportunidade única.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={handleConfirmClose}
                     className="flex-1 bg-transparent border border-white/20 text-gray-300 font-semibold py-3 px-4 rounded-xl hover:bg-white/5 hover:text-white transition-all text-sm"
                   >
-                    Sim, quero perder
+                    Sair sem análise
                   </button>
                   <button
                     onClick={handleStay}
                     className="flex-[2] bg-brand-gold text-brand-dark font-bold py-3 px-4 rounded-xl hover:bg-brand-goldHover transition-all shadow-lg text-sm transform hover:scale-[1.02]"
                   >
-                    Não, quero o desconto!
+                    Quero minha análise!
                   </button>
                 </div>
               </div>
@@ -207,15 +208,15 @@ const DiscountPopup: React.FC = () => {
                 <div className="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-5 shadow-[0_0_20px_rgba(34,197,94,0.4)]">
                   <span className="material-symbols-outlined text-white text-4xl">check_circle</span>
                 </div>
-                <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">Desconto garantido!</h2>
+                <h2 className="text-3xl font-bold text-white mb-3 tracking-tight">Solicitação Recebida!</h2>
                 <p className="text-gray-300 mb-8 text-sm leading-relaxed">
-                  Desconto garantido! Vamos chamar você no WhatsApp em instantes.
+                  Recebemos sua solicitação! Vamos chamar você no WhatsApp em instantes.
                 </p>
                 <button
                   onClick={() => setIsOpen(false)}
                   className="w-full bg-brand-gold text-brand-dark font-bold py-4 rounded-xl hover:bg-brand-goldHover transition-all shadow-lg text-lg transform hover:scale-[1.02]"
                 >
-                  Desconto Garantido!
+                  Solicitação Recebida!
                 </button>
               </div>
             )}
